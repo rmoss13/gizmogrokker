@@ -23,6 +23,10 @@ android {
             )
         }
     }
+
+    packagingOptions {
+        exclude("META-INF/atomicfu.kotlin_module")
+    }
 }
 
 dependencies {

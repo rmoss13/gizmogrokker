@@ -1,29 +1,33 @@
 package com.pillar.gizmogrokker
 
+import android.bluetooth.BluetoothAdapter
+
 typealias DeviceCallback = (BloothDevice) -> Unit
 typealias EnabledCallback = () -> Unit
 typealias DiscoveryEndedCallback = () -> Unit
 
 interface BluetoothInterface {
 
-    fun startDiscovery() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    val adapter: BluetoothAdapter?
+    val hasBluetoothSupport: Boolean get() = adapter != null
+    val isEnabled: Boolean get() = adapter?.isEnabled ?: false
 
     fun enable() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    fun startDiscovery() {
     }
 
     fun registerEnabled(callback: EnabledCallback) {
-
     }
 
     fun unregisterEnabled(callback: EnabledCallback) {
-
     }
 
-    val hasBluetoothSupport: Boolean get() = false
-    val isEnabled: Boolean get() = false
-    fun registerDeviceDiscovered(callback: DeviceCallback)
-    fun registerDiscoveryEnded(callback: DiscoveryEndedCallback)
+    fun registerDeviceDiscovered(callback: DeviceCallback) {
+    }
+
+    fun registerDiscoveryEnded(callback: DiscoveryEndedCallback) {
+    }
+
 }
