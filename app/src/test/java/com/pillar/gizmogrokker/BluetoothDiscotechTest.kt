@@ -1,6 +1,7 @@
 package com.pillar.gizmogrokker
 
 import android.bluetooth.BluetoothAdapter
+import android.content.Context
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
@@ -80,8 +81,9 @@ class BluetoothDiscotechTest {
     }.let { Unit }
 }
 
-class FakeBluetoothInterface(val autoFinishDiscovery: Boolean = true) : BluetoothInterface {
+class FakeBluetoothInterface(val autoFinishDiscovery: Boolean = true) : BluetoothInterface() {
     override val adapter: BluetoothAdapter get() = throw NotImplementedError("Will not implement.")
+    override val context: Context get() = throw NotImplementedError("Will not implement.")
     val enabledCallbackList = mutableListOf<EnabledCallback>()
     val deviceCallbackList = mutableListOf<DeviceCallback>()
     val discoveryEndedCallbackList = mutableListOf<DiscoveryEndedCallback>()
