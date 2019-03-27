@@ -36,6 +36,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.1.0-alpha05")
     implementation("androidx.constraintlayout:constraintlayout:1.1.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.0-alpha")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.0-alpha")
     testImplementation("org.mockito:mockito-core:2.24.5")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0")
     testImplementation("junit:junit:4.12")
