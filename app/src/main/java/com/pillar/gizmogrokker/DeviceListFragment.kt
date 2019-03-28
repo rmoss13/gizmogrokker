@@ -7,9 +7,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.fragment_device_list.*
 
 class DeviceListFragment : Fragment() {
+    private val recyclerView get() = view as RecyclerView
+
+    var deviceList: List<BloothDevice> = emptyList()
+        set(value) {
+            field = value
+            recyclerView.adapter = DeviceRecyclerViewAdapter(deviceList)
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -18,7 +24,7 @@ class DeviceListFragment : Fragment() {
     ) = inflateView<RecyclerView>(inflater, container, R.layout.fragment_device_list)
         .apply {
             layoutManager = LinearLayoutManager(context)
-            adapter = DeviceRecyclerViewAdapter(emptyList())
+            adapter = DeviceRecyclerViewAdapter(deviceList)
         }
 
     @Suppress("UNCHECKED_CAST")
@@ -27,11 +33,4 @@ class DeviceListFragment : Fragment() {
         container: ViewGroup?,
         layout: Int
     ): T = inflater.inflate(layout, container, false) as T
-
-    var deviceList: List<BloothDevice> = emptyList()
-        set(value) {
-            field = value
-            list.adapter = DeviceRecyclerViewAdapter(deviceList)
-        }
-
 }

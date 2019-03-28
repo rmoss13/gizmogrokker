@@ -26,25 +26,27 @@ class MainActivity : AppCompatActivity() {
         ioScope.launch {
             val bluetoothInterface: BluetoothInterface = bluetoothInterface()
 
-            bluetoothInterface.checkBluetoothState()
-                .apply {
+            val deviceList: List<BloothDevice> = bluetoothInterface.checkBluetoothState()
+                .run {
                     when (this) {
                         Ready -> bluetoothInterface.discoverize()
-                        MustRequest -> println("must request").apply { TODO() }
-                        NoBlooth -> println("no blooth").apply { TODO() }
+                        MustRequest -> listOf<BloothDevice>().also { println("must request") }
+                        NoBlooth -> listOf<BloothDevice>().also { println("no blooth") }
                     }
                 }
 
-            withContext(uiScope.coroutineContext) { findDevices.text = "Do it again!" }
+            withContext(uiScope.coroutineContext) {
+                val deviceListFragment: DeviceListFragment = fragment as DeviceListFragment
+                deviceListFragment.deviceList = deviceList
+                findDevices.text = "Do it again!"
+            }
         }
     }
 
-    private suspend fun BluetoothInterface.discoverize() {
-        BluetoothDiscotech(this)
-            .also { println("Starting Discovery") }
-            .discoverize()
-            .also { println("Discovery complete, $it") }
-    }
+    private suspend fun BluetoothInterface.discoverize() = BluetoothDiscotech(this)
+        .also { println("Starting Discovery") }
+        .discoverize()
+        .also { println("Discovery complete, $it") }
 
     private fun bluetoothInterface() = object : BluetoothInterface() {
         override val context: Context get() = applicationContext
@@ -58,9 +60,7 @@ class MainActivity : AppCompatActivity() {
         .checkBluetoothState()
 
     override fun onDestroy() {
-        println("on destroy")
         super.onDestroy()
-
         job.cancel()
     }
 }
