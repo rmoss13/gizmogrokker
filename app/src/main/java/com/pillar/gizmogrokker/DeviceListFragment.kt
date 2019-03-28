@@ -28,8 +28,10 @@ class DeviceListFragment : Fragment() {
         layout: Int
     ): T = inflater.inflate(layout, container, false) as T
 
-    fun setDeviceList(deviceList: List<BloothDevice>) {
-        list.adapter = DeviceRecyclerViewAdapter(deviceList)
-    }
+    var deviceList: List<BloothDevice> = emptyList()
+        set(value) {
+            field = value
+            list.adapter = DeviceRecyclerViewAdapter(deviceList)
+        }
 
 }
