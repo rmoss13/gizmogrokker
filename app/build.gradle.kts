@@ -45,5 +45,6 @@ dependencies {
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0")
     testImplementation("junit:junit:4.12")
     androidTestImplementation("androidx.test:runner:1.1.2-alpha02")
+    androidTestImplementation("androidx.test:rules:1.1.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.2.0-alpha02")
 }
