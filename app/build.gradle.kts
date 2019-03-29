@@ -39,6 +39,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.0-alpha")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.1.0-alpha03")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.0.0")
+    implementation("androidx.lifecycle:lifecycle-extensions:2.0.0")
 
     debugImplementation("androidx.fragment:fragment-testing:1.1.0-alpha05")
     debugImplementation("androidx.test:runner:1.1.2-alpha02")
@@ -48,6 +50,7 @@ dependencies {
     testImplementation("junit:junit:4.12")
 
     androidTestImplementation("androidx.test:runner:1.1.2-alpha02")
+
     androidTestImplementation("androidx.test:rules:1.1.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.2.0-alpha02")
     androidTestImplementation("com.schibsted.spain:barista:2.10.0") {

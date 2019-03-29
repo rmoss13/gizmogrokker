@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProviders
 import com.pillar.gizmogrokker.GrokkerBluetoothState.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
@@ -26,46 +28,53 @@ class MainActivity : AppCompatActivity() {
     private val ioScope get() = CoroutineScope(Dispatchers.IO + job)
     private val uiScope get() = CoroutineScope(Dispatchers.Main + job)
 
+    private lateinit var viewModel: DeviceListViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         job = Job()
+
+        viewModel = ViewModelProviders.of(this).get(DeviceListViewModel::class.java)
+
+        updateViewState()
     }
+
+    private fun updateViewState() {
+        deviceListFragment.deviceList = viewModel.deviceList
+        findDevices.apply {
+            isEnabled = viewModel.buttonEnabled
+            text = viewModel.buttonText
+        }
+    }
+
+    private val deviceListFragment get() = fragment as DeviceListFragment
 
     fun View.onFindBloothDevicesClick() {
         ioScope.launch {
             bluetoothInterface.checkBluetoothState()
                 .run {
                     when (this) {
-                        Ready -> bluetoothInterface.discoverizeAndUpdateUi()
+                        Ready -> viewModel.deviceList = bluetoothInterface.discoverize()
                         MustRequest -> requestPermissions()
-                        NoBlooth -> performUiUpdate {
-                            findDevices.run {
-                                isEnabled = false
-                                text = getString(R.string.NoBloothText)
-                            }
+                        NoBlooth -> viewModel.run {
+                            buttonEnabled = false
+                            buttonText = getString(R.string.NoBloothText)
                         }
                     }
                 }
+
+            performUiUpdate { updateViewState() }
         }
     }
 
     private fun BluetoothInterface.discoverizeAndUpdateUi() = ioScope.launch {
-        val deviceList = discoverize()
-        performUiUpdate {
-            showDiscoveredDevices(deviceList)
-        }
+        viewModel.deviceList = discoverize()
     }
 
     private suspend fun performUiUpdate(block: suspend CoroutineScope.() -> Unit) {
         withContext(uiScope.coroutineContext, block)
     }
-
-    private fun showDiscoveredDevices(deviceList: MutableList<BloothDevice>) {
-        val deviceListFragment: DeviceListFragment = fragment as DeviceListFragment
-        deviceListFragment.deviceList = deviceList
-    }
-
 
     private fun requestPermissions() {
         ActivityCompat.requestPermissions(
@@ -113,3 +122,9 @@ class MainActivity : AppCompatActivity() {
         job.cancel()
     }
 }
+
+class DeviceListViewModel(
+    var deviceList: List<BloothDevice> = emptyList(),
+    var buttonText: String = "Find Blooth Devices!",
+    var buttonEnabled: Boolean = true
+) : ViewModel()
