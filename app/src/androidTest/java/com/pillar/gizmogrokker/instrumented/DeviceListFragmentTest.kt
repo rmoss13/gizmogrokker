@@ -14,7 +14,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-
 @RunWith(AndroidJUnit4ClassRunner::class)
 class DeviceListFragmentTest {
     private lateinit var scenario: FragmentScenario<DeviceListFragment>

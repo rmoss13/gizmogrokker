@@ -1,5 +1,6 @@
 package com.pillar.gizmogrokker.instrumented
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -11,6 +12,7 @@ import androidx.test.rule.ActivityTestRule
 import com.pillar.gizmogrokker.DeviceListFragment
 import com.pillar.gizmogrokker.MainActivity
 import com.pillar.gizmogrokker.R
+import com.schibsted.spain.barista.interaction.PermissionGranter
 import kotlinx.android.synthetic.main.activity_main.*
 import org.junit.Assume.assumeTrue
 import org.junit.Before
@@ -32,6 +34,8 @@ class BluetoothDeviceTest {
     @Test
     fun successfullyFindsAtLeastOneBluetoothDevice() {
         onView(withId(R.id.findDevices)).perform(click())
+
+        PermissionGranter.allowPermissionsIfNeeded(Manifest.permission.ACCESS_FINE_LOCATION)
 
         val deviceListFragment = deviceListFragment()
         waitUntil(30_000) { deviceListFragment.deviceList.isNotEmpty() }

@@ -1,15 +1,26 @@
 package com.pillar.gizmogrokker
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.pillar.gizmogrokker.GrokkerBluetoothState.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 
+const val REQUEST_BLUETOOTH_PERMISSIONS = 1
+
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private val permissions = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+    }
 
     private lateinit var job: Job
     private val ioScope get() = CoroutineScope(Dispatchers.IO + job)
@@ -19,26 +30,58 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         job = Job()
-        findDevices.setOnClickListener(this::onClick)
     }
 
-    private fun onClick(view: View) {
+    fun View.onFindBloothDevicesClick() {
         ioScope.launch {
-            val bluetoothInterface: BluetoothInterface = bluetoothInterface()
-
-            val deviceList: List<BloothDevice> = bluetoothInterface.checkBluetoothState()
+            bluetoothInterface.checkBluetoothState()
                 .run {
                     when (this) {
-                        Ready -> bluetoothInterface.discoverize()
-                        MustRequest -> listOf<BloothDevice>().also { println("must request") }
+                        Ready -> bluetoothInterface.discoverizeAndUpdateUi()
+                        MustRequest -> requestPermissions()
                         NoBlooth -> listOf<BloothDevice>().also { println("no blooth") }
                     }
                 }
+        }
+    }
 
-            withContext(uiScope.coroutineContext) {
-                val deviceListFragment: DeviceListFragment = fragment as DeviceListFragment
-                deviceListFragment.deviceList = deviceList
-                findDevices.text = "Do it again!"
+    private fun BluetoothInterface.discoverizeAndUpdateUi() = ioScope.launch {
+        val deviceList = discoverize()
+        performUiUpdate {
+            showDiscoveredDevices(deviceList)
+        }
+    }
+
+    private suspend fun performUiUpdate(block: suspend CoroutineScope.() -> Unit) {
+        withContext(uiScope.coroutineContext, block)
+    }
+
+    private fun showDiscoveredDevices(deviceList: MutableList<BloothDevice>) {
+        val deviceListFragment: DeviceListFragment =
+            fragment as DeviceListFragment
+        deviceListFragment.deviceList = deviceList
+        findDevices.text = "Do it again!"
+    }
+
+    private fun requestPermissions() {
+        ActivityCompat.requestPermissions(
+            this,
+            permissions,
+            REQUEST_BLUETOOTH_PERMISSIONS
+        )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            REQUEST_BLUETOOTH_PERMISSIONS -> {
+                when (grantResults[0]) {
+                    PackageManager.PERMISSION_GRANTED -> bluetoothInterface.discoverizeAndUpdateUi()
+                    else -> println("grant results ${grantResults[0]}")
+                }
             }
         }
     }
@@ -48,9 +91,11 @@ class MainActivity : AppCompatActivity() {
         .discoverize()
         .also { println("Discovery complete, $it") }
 
-    private fun bluetoothInterface() = object : BluetoothInterface() {
-        override val context: Context get() = applicationContext
-        override val adapter = BluetoothAdapter.getDefaultAdapter()
+    private val bluetoothInterface by lazy {
+        object : BluetoothInterface() {
+            override val context: Context get() = applicationContext
+            override val adapter = BluetoothAdapter.getDefaultAdapter()
+        }
     }
 
     private fun BluetoothInterface.checkBluetoothState() = BluetoothPermissionChecker(

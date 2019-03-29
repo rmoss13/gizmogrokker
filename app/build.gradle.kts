@@ -39,12 +39,20 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.0-alpha")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.recyclerview:recyclerview:1.1.0-alpha03")
+
     debugImplementation("androidx.fragment:fragment-testing:1.1.0-alpha05")
     debugImplementation("androidx.test:runner:1.1.2-alpha02")
+
     testImplementation("org.mockito:mockito-core:2.24.5")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0")
     testImplementation("junit:junit:4.12")
+
     androidTestImplementation("androidx.test:runner:1.1.2-alpha02")
     androidTestImplementation("androidx.test:rules:1.1.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.2.0-alpha02")
+    androidTestImplementation("com.schibsted.spain:barista:2.10.0") {
+        exclude(group = "com.android.support")
+        exclude(group = "org.jetbrains.kotlin")
+        exclude(group = "androidx.test.espresso")
+    }
 }
