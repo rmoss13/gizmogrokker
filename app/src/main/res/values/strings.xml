@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Gizmo Grokker</string>
     <string name="find_blooth_devices">Find Blooth Devices!</string>
+    <string name="NoBloothText">Emulator n00b</string>
 </resources>

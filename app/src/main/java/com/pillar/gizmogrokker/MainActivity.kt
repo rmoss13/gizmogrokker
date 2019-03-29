@@ -39,7 +39,12 @@ class MainActivity : AppCompatActivity() {
                     when (this) {
                         Ready -> bluetoothInterface.discoverizeAndUpdateUi()
                         MustRequest -> requestPermissions()
-                        NoBlooth -> listOf<BloothDevice>().also { println("no blooth") }
+                        NoBlooth -> performUiUpdate {
+                            findDevices.run {
+                                isEnabled = false
+                                text = getString(R.string.NoBloothText)
+                            }
+                        }
                     }
                 }
         }
@@ -57,11 +62,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showDiscoveredDevices(deviceList: MutableList<BloothDevice>) {
-        val deviceListFragment: DeviceListFragment =
-            fragment as DeviceListFragment
+        val deviceListFragment: DeviceListFragment = fragment as DeviceListFragment
         deviceListFragment.deviceList = deviceList
-        findDevices.text = "Do it again!"
     }
+
 
     private fun requestPermissions() {
         ActivityCompat.requestPermissions(
