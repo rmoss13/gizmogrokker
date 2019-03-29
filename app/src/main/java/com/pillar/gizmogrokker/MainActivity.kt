@@ -68,10 +68,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun BluetoothInterface.discoverizeAndUpdateUi() = ioScope.launch {
-        viewModel.deviceList = discoverize()
-    }
-
     private suspend fun performUiUpdate(block: suspend CoroutineScope.() -> Unit) {
         withContext(uiScope.coroutineContext, block)
     }
@@ -92,11 +88,17 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             REQUEST_BLUETOOTH_PERMISSIONS -> {
                 when (grantResults[0]) {
-                    PackageManager.PERMISSION_GRANTED -> bluetoothInterface.discoverizeAndUpdateUi()
+                    PackageManager.PERMISSION_GRANTED -> permissionGranted()
                     else -> println("grant results ${grantResults[0]}")
                 }
+
             }
         }
+    }
+
+    private fun permissionGranted() = ioScope.launch {
+        viewModel.deviceList = bluetoothInterface.discoverize()
+        performUiUpdate { updateViewState() }
     }
 
     private suspend fun BluetoothInterface.discoverize() = BluetoothDiscotech(this)
