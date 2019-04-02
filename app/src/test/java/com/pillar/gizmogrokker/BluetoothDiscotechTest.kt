@@ -67,8 +67,22 @@ class BluetoothDiscotechTest {
         val discoveredDevicesDeferred = async { discotech.discoverize() }
 
         val devices = listOf(
-            BloothDevice(name = "Banana", macAddress = "38-F9-D3-3E-3E-D3"),
-            BloothDevice(name = null, macAddress = "10-94-BB-B5-F4-AA")
+            BloothDevice(
+                name = "Banana",
+                macAddress = "38-F9-D3-3E-3E-D3",
+                type = DeviceType.Classic,
+                majorClass = null,
+                minorClass = null,
+                services = emptyList()
+            ),
+            BloothDevice(
+                name = null,
+                macAddress = "10-94-BB-B5-F4-AA",
+                type = DeviceType.Dual,
+                majorClass = null,
+                minorClass = null,
+                services = emptyList()
+            )
         )
 
         runBlocking {

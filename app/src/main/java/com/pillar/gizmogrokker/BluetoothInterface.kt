@@ -48,7 +48,11 @@ abstract class BluetoothInterface {
 
         private fun BluetoothDevice.bloothDevice() = BloothDevice(
             name = name,
-            macAddress = address
+            macAddress = address,
+            type = DeviceType.fromInt(type),
+            majorClass = MajorClass.fromInt(bluetoothClass.majorDeviceClass),
+            minorClass = MinorClass.fromInt(bluetoothClass.deviceClass),
+            services = DeviceService.getAvailableServices(bluetoothClass)
         )
 
         private fun Intent.bluetoothDevice(): BluetoothDevice =
@@ -65,11 +69,17 @@ abstract class BluetoothInterface {
     }
 
     open fun startDiscovery() {
+        if (adapter?.isDiscovering == true) {
+            adapter?.cancelDiscovery()
+        }
+
         adapter?.startDiscovery()
         val stateChanged = BluetoothAdapter.ACTION_STATE_CHANGED
         val filter = IntentFilter(stateChanged)
-            .apply { addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED) }
-            .apply { addAction(BluetoothDevice.ACTION_FOUND) }
+            .apply {
+                addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+                addAction(BluetoothDevice.ACTION_FOUND)
+            }
         context.registerReceiver(broadcastReceiver, filter)
     }
 
@@ -91,3 +101,4 @@ abstract class BluetoothInterface {
     }
 
 }
+
