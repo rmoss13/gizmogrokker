@@ -16,14 +16,12 @@ class BluetoothDiscotech(private val bluetoothInterface: BluetoothInterface) {
 
     private suspend fun collectDevices() = mutableListOf<BloothDevice>()
         .also { devices ->
-            bluetoothInterface.deviceDiscovered.plus { devices += it }
+            bluetoothInterface.deviceDiscovered + { devices += it }
             waitForDiscoveryToFinish()
         }
 
     private suspend fun waitForDiscoveryToFinish() = CompletableDeferred<Unit>()
-        .apply {
-            bluetoothInterface.discoveryEnded.plus { complete(Unit) }
-        }
+        .apply { bluetoothInterface.discoveryEnded + { complete(Unit) } }
         .await()
 
     private fun onBluetoothEnabled(unit: Unit) {
