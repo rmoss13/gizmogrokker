@@ -2,4 +2,10 @@
     <string name="app_name">Gizmo Grokker</string>
     <string name="find_blooth_devices">Find Blooth Devices!</string>
     <string name="NoBloothText">Emulator n00b</string>
+    <string name="address">Address:</string>
+    <string name="services">Services:</string>
+    <string name="minor_class">Minor Class</string>
+    <string name="major_class">Major Class:</string>
+    <string name="type">Type:</string>
+    <string name="name">Name:</string>
 </resources>
