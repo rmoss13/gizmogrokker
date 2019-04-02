@@ -2,9 +2,6 @@ package com.pillar.gizmogrokker
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -14,17 +11,12 @@ class BluetoothDiscotechTest {
 
     @Test
     fun whenBluetoothIsEnabledShouldStartDiscovery() = runBlocking {
-        val bluetoothInterface = mock<BluetoothInterface> {
-            on { isEnabled }.thenReturn(true)
-            on { registerDiscoveryEnded(any()) }
-                .thenAnswer { it.getArgument<DiscoveryEndedCallback>(0).invoke() }
-        }
-
+        val bluetoothInterface = FakeBluetoothInterface(isEnabled = true, autoFinishDiscovery = true)
         val discotech = BluetoothDiscotech(bluetoothInterface)
 
         discotech.discoverize()
 
-        verify(bluetoothInterface).startDiscovery()
+        assertEquals(1, bluetoothInterface.startDiscoveryCallCount)
     }.let { Unit }
 
     @Test
@@ -35,9 +27,9 @@ class BluetoothDiscotechTest {
 
         bluetoothInterface.apply {
             assertEquals(1, enableCount)
-            assertEquals(0, discoCount)
-            invokeEnabledCallbacks()
-            assertEquals(1, discoCount)
+            assertEquals(0, startDiscoveryCallCount)
+            bluetoothEnabled.eventOccurred(Unit)
+            assertEquals(1, startDiscoveryCallCount)
         }
     }.let { Unit }
 
@@ -49,12 +41,12 @@ class BluetoothDiscotechTest {
         discotech.discoverize()
 
         bluetoothInterface.apply {
-            invokeEnabledCallbacks()
-            invokeEnabledCallbacks()
-            invokeEnabledCallbacks()
-            invokeEnabledCallbacks()
+            bluetoothEnabled.eventOccurred(Unit)
+            bluetoothEnabled.eventOccurred(Unit)
+            bluetoothEnabled.eventOccurred(Unit)
+            bluetoothEnabled.eventOccurred(Unit)
 
-            assertEquals(1, discoCount)
+            assertEquals(1, startDiscoveryCallCount)
         }
     }.let { Unit }
 
@@ -86,8 +78,9 @@ class BluetoothDiscotechTest {
         )
 
         runBlocking {
-            devices.forEach { bluetoothInterface.invokeDeviceCallbacks(it) }
-            bluetoothInterface.invokeDiscoveryEnded()
+            devices.forEach { bluetoothInterface.deviceDiscovered.eventOccurred(it) }
+            bluetoothInterface.discoveryEnded.eventOccurred(Unit)
+            Unit
         }
 
         val actualDevices = discoveredDevicesDeferred.await()
@@ -95,50 +88,37 @@ class BluetoothDiscotechTest {
     }.let { Unit }
 }
 
-class FakeBluetoothInterface(val autoFinishDiscovery: Boolean = true) : BluetoothInterface() {
+class FakeBluetoothInterface(
+    override val isEnabled: Boolean = false,
+    val autoFinishDiscovery: Boolean = true
+) : BluetoothInterface() {
     override val adapter: BluetoothAdapter get() = throw NotImplementedError("Will not implement.")
     override val context: Context get() = throw NotImplementedError("Will not implement.")
-    val enabledCallbackList = mutableListOf<EnabledCallback>()
-    val deviceCallbackList = mutableListOf<DeviceCallback>()
-    val discoveryEndedCallbackList = mutableListOf<DiscoveryEndedCallback>()
-    var discoCount: Int = 0
-    var enableCount: Int = 0
 
-    override val isEnabled: Boolean = false
+    override val discoveryEnded = AutoFinishEvent(autoFinishDiscovery = autoFinishDiscovery)
+
+    var startDiscoveryCallCount: Int = 0
+    var enableCount: Int = 0
 
     override fun enable() {
         enableCount++
     }
 
-    override fun registerEnabled(callback: EnabledCallback) {
-        enabledCallbackList += callback
-    }
-
-    override fun unregisterEnabled(callback: EnabledCallback) {
-        enabledCallbackList -= callback
-    }
-
-    override fun registerDeviceDiscovered(callback: DeviceCallback) {
-        deviceCallbackList += callback
-    }
-
-    override fun registerDiscoveryEnded(callback: DiscoveryEndedCallback) {
-        if (autoFinishDiscovery) {
-            callback()
-        } else {
-            discoveryEndedCallbackList += callback
-        }
-    }
-
-    fun invokeEnabledCallbacks() = enabledCallbackList.toList().forEach { it() }
-    fun invokeDeviceCallbacks(newDevice: BloothDevice) =
-        deviceCallbackList.toList().forEach { it(newDevice) }
-
     override fun startDiscovery() {
-        discoCount++
+        startDiscoveryCallCount++
     }
 
-    fun invokeDiscoveryEnded() {
-        discoveryEndedCallbackList.toList().forEach { it.invoke() }
+}
+
+class AutoFinishEvent(
+    private val dataEvent: DataEvent<Unit, DiscoveryEndedCallback> = DataEvent(),
+    val autoFinishDiscovery: Boolean = true
+) : Event<Unit, DiscoveryEndedCallback> by dataEvent {
+    override fun plus(listener: DiscoveryEndedCallback) {
+        if (autoFinishDiscovery) {
+            listener(Unit)
+        } else {
+            dataEvent.plus(listener)
+        }
     }
 }

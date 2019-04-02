@@ -8,16 +8,16 @@ import android.content.Intent
 import android.content.IntentFilter
 
 typealias DeviceCallback = (BloothDevice) -> Unit
-typealias EnabledCallback = () -> Unit
-typealias DiscoveryEndedCallback = () -> Unit
+typealias EnabledCallback = (Unit) -> Unit
+typealias DiscoveryEndedCallback = (Unit) -> Unit
 
 abstract class BluetoothInterface {
 
     abstract val adapter: BluetoothAdapter?
     abstract val context: Context
-    private var enabledCallback: EnabledCallback? = null
-    private var discoveryEndedCallback: DiscoveryEndedCallback? = null
-    private var deviceDiscoveredCallback: DeviceCallback? = null
+    val bluetoothEnabled: Event<Unit, EnabledCallback> = DataEvent()
+    open val discoveryEnded: Event<Unit, DiscoveryEndedCallback> = DataEvent()
+    open val deviceDiscovered: Event<BloothDevice, DeviceCallback> = DataEvent()
 
     val hasBluetoothSupport: Boolean get() = adapter != null
     open val isEnabled: Boolean get() = adapter?.isEnabled ?: false
@@ -33,17 +33,17 @@ abstract class BluetoothInterface {
 
         private fun Context.handleDiscoveryFinished() {
             unregisterReceiver(this)
-                .also { discoveryEndedCallback?.invoke() }
+                .also { discoveryEnded.eventOccurred(Unit) }
         }
 
         private fun handleStateChanged() {
-            enabledCallback?.invoke()
+            bluetoothEnabled.eventOccurred(Unit)
         }
 
         private fun Intent.handleFound() {
             bluetoothDevice()
                 .bloothDevice()
-                .let { deviceDiscoveredCallback?.invoke(it) }
+                .let { deviceDiscovered.eventOccurred(it) }
         }
 
         private fun BluetoothDevice.bloothDevice() = BloothDevice(
@@ -83,21 +83,28 @@ abstract class BluetoothInterface {
         context.registerReceiver(broadcastReceiver, filter)
     }
 
+}
 
-    open fun registerEnabled(callback: EnabledCallback) {
-        this.enabledCallback = callback
+interface Event<I, T : (I) -> Unit> {
+    operator fun plus(listener: T)
+    operator fun minus(listener: T)
+    fun eventOccurred(input: I)
+}
+
+class DataEvent<I, T : (I) -> Unit> : Event<I, T> {
+
+    private var listenerList = listOf<T>()
+
+    override fun plus(listener: T) {
+        listenerList = listenerList + listener
     }
 
-    open fun unregisterEnabled(callback: EnabledCallback) {
-        this.enabledCallback = null
+    override fun minus(listener: T) {
+        listenerList = listenerList - listener
     }
 
-    open fun registerDeviceDiscovered(callback: DeviceCallback) {
-        this.deviceDiscoveredCallback = callback
-    }
-
-    open fun registerDiscoveryEnded(callback: DiscoveryEndedCallback) {
-        this.discoveryEndedCallback = callback
+    override fun eventOccurred(input: I) {
+        listenerList.toList().forEach { it.invoke(input) }
     }
 
 }

@@ -2,7 +2,7 @@ package com.pillar.gizmogrokker
 
 import kotlinx.coroutines.CompletableDeferred
 
-class BluetoothDiscotech(val bluetoothInterface: BluetoothInterface) {
+class BluetoothDiscotech(private val bluetoothInterface: BluetoothInterface) {
 
     suspend fun discoverize() = beginDiscovery()
         .run { collectDevices() }
@@ -11,22 +11,24 @@ class BluetoothDiscotech(val bluetoothInterface: BluetoothInterface) {
         bluetoothInterface.startDiscovery()
     } else {
         bluetoothInterface.enable()
-        bluetoothInterface.registerEnabled(::onBluetoothEnabled)
+        bluetoothInterface.bluetoothEnabled + ::onBluetoothEnabled
     }
 
     private suspend fun collectDevices() = mutableListOf<BloothDevice>()
         .also { devices ->
-            bluetoothInterface.registerDeviceDiscovered { devices += it }
+            bluetoothInterface.deviceDiscovered.plus { devices += it }
             waitForDiscoveryToFinish()
         }
 
     private suspend fun waitForDiscoveryToFinish() = CompletableDeferred<Unit>()
-        .apply { bluetoothInterface.registerDiscoveryEnded { complete(Unit) } }
+        .apply {
+            bluetoothInterface.discoveryEnded.plus { complete(Unit) }
+        }
         .await()
 
-    private fun onBluetoothEnabled() {
+    private fun onBluetoothEnabled(unit: Unit) {
         bluetoothInterface.startDiscovery()
-        bluetoothInterface.unregisterEnabled(::onBluetoothEnabled)
+        bluetoothInterface.bluetoothEnabled - ::onBluetoothEnabled
     }
 
 }
