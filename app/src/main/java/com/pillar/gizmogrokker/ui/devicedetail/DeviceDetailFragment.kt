@@ -11,21 +11,24 @@ import com.pillar.gizmogrokker.R
 import kotlinx.android.synthetic.main.device_detail_fragment.view.*
 
 class DeviceDetailFragment : Fragment() {
+    private val noNameMessage = "Connect to this device to get its name"
+    private val unknown = "Unknown"
     private val device get() = arguments?.getSerializable("device") as BloothDevice
 
-    companion object {
-        const val NO_NAME_MSG = "Connect to this device to get its name"
-        const val UNKNOWN = "Unknown"
-    }
-
     private lateinit var viewModel: DeviceDetailViewModel
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewModel = ViewModelProviders.of(this).get(DeviceDetailViewModel::class.java)
+        viewModel.device = device
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.device_detail_fragment, container, false)
         .apply {
-            device.run {
+            viewModel.device?.run {
                 device_mac_address.text = macAddress
                 device_name.text = name()
                 device_type.text = displayType()
@@ -35,14 +38,17 @@ class DeviceDetailFragment : Fragment() {
             }
         }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProviders.of(this).get(DeviceDetailViewModel::class.java)
-    }
+    private fun BloothDevice.name(): String = device.name ?: noNameMessage
+    private fun BloothDevice.displayType(): String = device.type.displayName
+    private fun BloothDevice.majorClass(): String = device.majorClass?.toString() ?: unknown
+    private fun BloothDevice.minorClass(): String = device.minorClass?.displayName() ?: unknown
+    private fun BloothDevice.services(): String =
+        device.services.ifEmpty { listOf("None") }.joinToString(", ")
 
-    fun BloothDevice.name() : String = device.name ?: NO_NAME_MSG
-    fun BloothDevice.displayType() : String = device.type.displayName
-    fun BloothDevice.majorClass() : String = device.majorClass?.toString() ?: UNKNOWN
-    fun BloothDevice.minorClass() : String = device.minorClass?.displayName() ?: UNKNOWN
-    fun BloothDevice.services() : String = device.services.ifEmpty { listOf("None") }.joinToString(", ")
+    companion object {
+        fun create(device: BloothDevice) : DeviceDetailFragment =
+            DeviceDetailFragment().apply {
+                arguments = Bundle().apply { putSerializable("device", device) }
+            }
+    }
 }

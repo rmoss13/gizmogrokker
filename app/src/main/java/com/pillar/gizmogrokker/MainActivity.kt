@@ -3,6 +3,7 @@ package com.pillar.gizmogrokker
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
 import com.pillar.gizmogrokker.GrokkerBluetoothState.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.fragment_device.view.*
 import kotlinx.coroutines.*
 
 const val REQUEST_BLUETOOTH_PERMISSIONS = 1
@@ -118,6 +120,13 @@ class MainActivity : AppCompatActivity() {
         PermissionProxy(applicationContext)
     )
         .checkBluetoothState()
+
+    fun View.onShowDeviceDetailClick() {
+        val intent = Intent(context, DeviceDetail::class.java)
+            .apply { putExtra("device", device_tag.tag as BloothDevice) }
+
+        startActivity(intent)
+    }
 
     override fun onDestroy() {
         super.onDestroy()

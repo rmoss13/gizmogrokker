@@ -53,6 +53,8 @@ dependencies {
 
     androidTestImplementation("androidx.test:rules:1.1.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.2.0-alpha02")
+    androidTestImplementation("androidx.test.espresso:espresso-intents:3.1.1")
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:3.1.1")
     androidTestImplementation("com.schibsted.spain:barista:2.10.0") {
         exclude(group = "com.android.support")
         exclude(group = "org.jetbrains.kotlin")

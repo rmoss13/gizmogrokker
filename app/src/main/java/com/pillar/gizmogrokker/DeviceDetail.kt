@@ -10,8 +10,13 @@ class DeviceDetail : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.device_detail_activity)
         if (savedInstanceState == null) {
+            val device : BloothDevice = intent?.extras?.getSerializable("device") as BloothDevice
+
             supportFragmentManager.beginTransaction()
-                .replace(R.id.container, DeviceDetailFragment())
+                .replace(
+                    R.id.container,
+                    DeviceDetailFragment.create(device)
+                )
                 .commitNow()
         }
     }
