@@ -94,7 +94,6 @@ class FakeBluetoothInterface(
 ) : BluetoothInterface() {
     override val adapter: BluetoothAdapter get() = throw NotImplementedError("Will not implement.")
     override val context: Context get() = throw NotImplementedError("Will not implement.")
-
     override val discoveryEnded = AutoFinishEvent(autoFinishDiscovery = autoFinishDiscovery)
 
     var startDiscoveryCallCount: Int = 0
@@ -111,9 +110,9 @@ class FakeBluetoothInterface(
 }
 
 class AutoFinishEvent(
-    private val dataEvent: DataEvent<Unit, DiscoveryEndedCallback> = DataEvent(),
+    private val dataEvent: DataEvent<Unit> = DataEvent(),
     val autoFinishDiscovery: Boolean = true
-) : Event<Unit, DiscoveryEndedCallback> by dataEvent {
+) : Event<Unit> by dataEvent {
     override fun plus(listener: DiscoveryEndedCallback) {
         if (autoFinishDiscovery) {
             listener(Unit)

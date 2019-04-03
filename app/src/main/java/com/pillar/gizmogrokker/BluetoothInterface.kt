@@ -7,62 +7,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 
-typealias DeviceCallback = (BloothDevice) -> Unit
-typealias EnabledCallback = (Unit) -> Unit
 typealias DiscoveryEndedCallback = (Unit) -> Unit
 
 abstract class BluetoothInterface {
 
     abstract val adapter: BluetoothAdapter?
     abstract val context: Context
-    val bluetoothEnabled: Event<Unit, EnabledCallback> = DataEvent()
-    open val discoveryEnded: Event<Unit, DiscoveryEndedCallback> = DataEvent()
-    open val deviceDiscovered: Event<BloothDevice, DeviceCallback> = DataEvent()
+    val bluetoothEnabled: Event<Unit> = DataEvent()
+    open val discoveryEnded: Event<Unit> = DataEvent()
+    open val deviceDiscovered: Event<BloothDevice> = DataEvent()
 
     val hasBluetoothSupport: Boolean get() = adapter != null
     open val isEnabled: Boolean get() = adapter?.isEnabled ?: false
-
-    private val broadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            when (intent.action) {
-                BluetoothAdapter.ACTION_STATE_CHANGED -> handleStateChanged()
-                BluetoothDevice.ACTION_FOUND -> intent.handleFound()
-                BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> context.handleDiscoveryFinished()
-            }
-        }
-
-        private fun Context.handleDiscoveryFinished() {
-            unregisterReceiver(this)
-                .also { discoveryEnded.eventOccurred(Unit) }
-        }
-
-        private fun handleStateChanged() {
-            bluetoothEnabled.eventOccurred(Unit)
-        }
-
-        private fun Intent.handleFound() {
-            bluetoothDevice()
-                .bloothDevice()
-                .let { deviceDiscovered.eventOccurred(it) }
-        }
-
-        private fun BluetoothDevice.bloothDevice() = BloothDevice(
-            name = name,
-            macAddress = address,
-            type = DeviceType.fromInt(type),
-            majorClass = MajorClass.fromInt(bluetoothClass.majorDeviceClass),
-            minorClass = MinorClass.fromInt(bluetoothClass.deviceClass),
-            services = DeviceService.getAvailableServices(bluetoothClass)
-        )
-
-        private fun Intent.bluetoothDevice(): BluetoothDevice =
-            getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-
-    }
-
-    private fun unregisterReceiver(context: Context) {
-        context.unregisterReceiver(broadcastReceiver)
-    }
 
     open fun enable() {
         adapter?.enable()
@@ -71,41 +27,90 @@ abstract class BluetoothInterface {
     open fun startDiscovery() {
         if (adapter?.isDiscovering == true) {
             adapter?.cancelDiscovery()
-        }
 
+        }
         adapter?.startDiscovery()
-        val stateChanged = BluetoothAdapter.ACTION_STATE_CHANGED
-        val filter = IntentFilter(stateChanged)
-            .apply {
-                addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-                addAction(BluetoothDevice.ACTION_FOUND)
-            }
-        context.registerReceiver(broadcastReceiver, filter)
+
+        context.registerReceiver(
+            Receiver(bluetoothEnabled, discoveryEnded, deviceDiscovered),
+            IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+                .apply {
+                    addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+                    addAction(BluetoothDevice.ACTION_FOUND)
+                }
+        )
     }
 
+    companion object {
+        private class Receiver(
+            private val bluetoothEnabled: Event<Unit>,
+            private val discoveryEnded: Event<Unit>,
+            private val deviceDiscovered: Event<BloothDevice>
+        ) : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                when (intent.action) {
+                    BluetoothAdapter.ACTION_STATE_CHANGED -> handleStateChanged()
+                    BluetoothDevice.ACTION_FOUND -> intent.handleFound()
+                    BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> context.handleDiscoveryFinished()
+                }
+            }
+
+            private fun Context.handleDiscoveryFinished() {
+                unregisterReceiver(this)
+                    .also { discoveryEnded.eventOccurred(Unit) }
+            }
+
+            private fun handleStateChanged() {
+                bluetoothEnabled.eventOccurred(Unit)
+            }
+
+            private fun Intent.handleFound() {
+                bluetoothDevice()
+                    .bloothDevice()
+                    .let { deviceDiscovered.eventOccurred(it) }
+            }
+
+            private fun BluetoothDevice.bloothDevice() = BloothDevice(
+                name = name,
+                macAddress = address,
+                type = DeviceType.fromInt(type),
+                majorClass = MajorClass.fromInt(bluetoothClass.majorDeviceClass),
+                minorClass = MinorClass.fromInt(bluetoothClass.deviceClass),
+                services = DeviceService.getAvailableServices(bluetoothClass)
+            )
+
+            private fun Intent.bluetoothDevice(): BluetoothDevice =
+                getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+
+            private fun unregisterReceiver(context: Context) {
+                context.unregisterReceiver(this)
+            }
+        }
+    }
 }
 
-interface Event<I, T : (I) -> Unit> {
-    operator fun plus(listener: T)
-    operator fun minus(listener: T)
-    fun eventOccurred(input: I)
+typealias Listener<P> = (P) -> Unit
+
+interface Event<P> {
+    operator fun plus(listener: Listener<P>)
+    operator fun minus(listener: Listener<P>)
+    fun eventOccurred(input: P)
 }
 
-class DataEvent<I, T : (I) -> Unit> : Event<I, T> {
+class DataEvent<P> : Event<P> {
 
-    private var listenerList = listOf<T>()
+    private var listenerList = listOf<Listener<P>>()
 
-    override fun plus(listener: T) {
+    override fun plus(listener: Listener<P>) {
         listenerList = listenerList + listener
     }
 
-    override fun minus(listener: T) {
+    override fun minus(listener: Listener<P>) {
         listenerList = listenerList - listener
     }
 
-    override fun eventOccurred(input: I) {
+    override fun eventOccurred(input: P) {
         listenerList.toList().forEach { it.invoke(input) }
     }
 
 }
-
