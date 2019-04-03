@@ -12,7 +12,6 @@ import com.pillar.gizmogrokker.R
 import kotlinx.android.synthetic.main.device_detail_fragment.view.*
 
 class DeviceDetailFragment : Fragment() {
-    private val noNameMessage = "Connect to this device to get its name"
     private val unknown = "Unknown"
     private val device get() = arguments?.getSerializable("device") as BloothDevice
 
@@ -39,19 +38,12 @@ class DeviceDetailFragment : Fragment() {
             }
         }
 
-    private fun BloothDevice.name(): String = device.name ?: noNameMessage
+    private fun BloothDevice.name(): String = device.name ?: unknown
     private fun BloothDevice.displayType(): String = device.type.displayName
     private fun BloothDevice.majorClass(): String = device.majorClass?.toString() ?: unknown
     private fun BloothDevice.minorClass(): String = device.minorClass?.displayName() ?: unknown
     private fun BloothDevice.services(): String =
         device.services.ifEmpty { listOf("None") }.joinToString(", ")
-
-    companion object {
-        fun create(device: BloothDevice) : DeviceDetailFragment =
-            DeviceDetailFragment().apply {
-                arguments = Bundle().apply { putSerializable("device", device) }
-            }
-    }
 }
 
 class DeviceDetailViewModel(var device : BloothDevice? = null) : ViewModel()

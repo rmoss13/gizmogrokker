@@ -7,7 +7,9 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
-import com.pillar.gizmogrokker.*
+import com.pillar.gizmogrokker.BloothDevice
+import com.pillar.gizmogrokker.DeviceType
+import com.pillar.gizmogrokker.R
 import com.pillar.gizmogrokker.bluetoothclasses.BluetoothMajorClass
 import com.pillar.gizmogrokker.bluetoothclasses.BluetoothMinorClass
 import com.pillar.gizmogrokker.bluetoothclasses.BluetoothServiceClass
@@ -46,7 +48,7 @@ class DeviceDetailFragmentTest {
     fun whenNoNameShowsNoNameMessage() {
         val fragmentArgs = Bundle().apply { putSerializable("device", limitedDevice()) }
         launchFragmentInContainer<DeviceDetailFragment>(fragmentArgs)
-        onView(withId(R.id.device_name)).check(matches(withText("Connect to this device to get its name")))
+        onView(withId(R.id.device_name)).check(matches(withText("Unknown")))
     }
 
     @Test

@@ -4,8 +4,8 @@
     <string name="NoBloothText">Emulator n00b</string>
     <string name="address">Address:</string>
     <string name="services">Services:</string>
-    <string name="minor_class">Minor Class</string>
-    <string name="major_class">Major Class:</string>
     <string name="type">Type:</string>
     <string name="name">Name:</string>
+    <string name="major">Major:</string>
+    <string name="minor">Minor:</string>
 </resources>
