@@ -1,10 +1,11 @@
-package com.pillar.gizmogrokker
+package com.pillar.gizmogrokker.detail
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.pillar.gizmogrokker.ui.devicedetail.DeviceDetailFragment
+import com.pillar.gizmogrokker.BloothDevice
+import com.pillar.gizmogrokker.R
 
-class DeviceDetail : AppCompatActivity() {
+class DeviceDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

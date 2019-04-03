@@ -15,6 +15,9 @@ import androidx.test.espresso.matcher.ViewMatchers.hasMinimumChildCount
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import com.pillar.gizmogrokker.*
+import com.pillar.gizmogrokker.detail.DeviceDetailActivity
+import com.pillar.gizmogrokker.list.DeviceListFragment
+import com.pillar.gizmogrokker.list.DeviceListActivity
 import com.schibsted.spain.barista.interaction.PermissionGranter
 import kotlinx.android.synthetic.main.activity_main.*
 import org.hamcrest.CoreMatchers.instanceOf
@@ -28,7 +31,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4ClassRunner::class)
 class BluetoothDeviceTest {
     @get:Rule
-    val activityRule = IntentsTestRule(MainActivity::class.java)
+    val activityRule = IntentsTestRule(DeviceListActivity::class.java)
 
     @Before
     fun setUp() {
@@ -58,7 +61,7 @@ class BluetoothDeviceTest {
                 )
             )
 
-        intended(hasComponent(DeviceDetail::class.java.name))
+        intended(hasComponent(DeviceDetailActivity::class.java.name))
         intended(
             hasExtra(equalTo("device"), instanceOf<BloothDevice>(BloothDevice::class.java))
         )

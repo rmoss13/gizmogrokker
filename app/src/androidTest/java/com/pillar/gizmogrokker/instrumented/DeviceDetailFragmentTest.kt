@@ -8,7 +8,10 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import com.pillar.gizmogrokker.*
-import com.pillar.gizmogrokker.ui.devicedetail.DeviceDetailFragment
+import com.pillar.gizmogrokker.bluetoothclasses.BluetoothMajorClass
+import com.pillar.gizmogrokker.bluetoothclasses.BluetoothMinorClass
+import com.pillar.gizmogrokker.bluetoothclasses.BluetoothServiceClass
+import com.pillar.gizmogrokker.detail.DeviceDetailFragment
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -68,7 +71,7 @@ class DeviceDetailFragmentTest {
             name = null,
             macAddress = "12:34:56:78",
             type = DeviceType.Classic,
-            majorClass = MajorClass.Toy,
+            majorClass = BluetoothMajorClass.Toy,
             minorClass = null,
             services = emptyList()
         )
@@ -92,7 +95,7 @@ class DeviceDetailFragmentTest {
             macAddress = "12:34:56:78",
             type = DeviceType.Classic,
             majorClass = null,
-            minorClass = MinorClass.ToyUncategorized,
+            minorClass = BluetoothMinorClass.ToyUncategorized,
             services = emptyList()
         )
 
@@ -116,7 +119,7 @@ class DeviceDetailFragmentTest {
             type = DeviceType.Classic,
             majorClass = null,
             minorClass = null,
-            services = listOf(DeviceService.Audio, DeviceService.Capture)
+            services = listOf(BluetoothServiceClass.Audio, BluetoothServiceClass.Capture)
         )
 
         val fragmentArgs = Bundle().apply { putSerializable("device", device) }

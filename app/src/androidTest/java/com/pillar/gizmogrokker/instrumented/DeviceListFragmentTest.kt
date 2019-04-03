@@ -8,7 +8,7 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import com.pillar.gizmogrokker.BloothDevice
-import com.pillar.gizmogrokker.DeviceListFragment
+import com.pillar.gizmogrokker.list.DeviceListFragment
 import com.pillar.gizmogrokker.DeviceType
 import com.pillar.gizmogrokker.R
 import org.junit.Before

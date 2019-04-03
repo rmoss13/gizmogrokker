@@ -1,4 +1,4 @@
-package com.pillar.gizmogrokker
+package com.pillar.gizmogrokker.list
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
@@ -11,14 +11,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
+import com.pillar.gizmogrokker.*
 import com.pillar.gizmogrokker.GrokkerBluetoothState.*
+import com.pillar.gizmogrokker.detail.DeviceDetailActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_device.view.*
 import kotlinx.coroutines.*
 
 const val REQUEST_BLUETOOTH_PERMISSIONS = 1
 
-class MainActivity : AppCompatActivity() {
+class DeviceListActivity : AppCompatActivity() {
 
     companion object {
         private val permissions = arrayOf(
@@ -27,10 +29,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var job: Job
+    private lateinit var viewModel: DeviceListViewModel
     private val ioScope get() = CoroutineScope(Dispatchers.IO + job)
     private val uiScope get() = CoroutineScope(Dispatchers.Main + job)
-
-    private lateinit var viewModel: DeviceListViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,7 +104,9 @@ class MainActivity : AppCompatActivity() {
         performUiUpdate { updateViewState() }
     }
 
-    private suspend fun BluetoothInterface.discoverize() = BluetoothDiscotech(this)
+    private suspend fun BluetoothInterface.discoverize() = BluetoothDiscotech(
+        this
+    )
         .also { println("Starting Discovery") }
         .discoverize()
         .also { println("Discovery complete, $it") }
@@ -122,7 +125,7 @@ class MainActivity : AppCompatActivity() {
         .checkBluetoothState()
 
     fun View.onShowDeviceDetailClick() {
-        val intent = Intent(context, DeviceDetail::class.java)
+        val intent = Intent(context, DeviceDetailActivity::class.java)
             .apply { putExtra("device", device_tag.tag as BloothDevice) }
 
         startActivity(intent)

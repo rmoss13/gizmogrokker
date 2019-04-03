@@ -1,4 +1,4 @@
-package com.pillar.gizmogrokker
+package com.pillar.gizmogrokker.list
 
 
 import android.view.LayoutInflater
@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.pillar.gizmogrokker.BloothDevice
+import com.pillar.gizmogrokker.R
 import kotlinx.android.synthetic.main.fragment_device.view.*
 
 class DeviceRecyclerViewAdapter(

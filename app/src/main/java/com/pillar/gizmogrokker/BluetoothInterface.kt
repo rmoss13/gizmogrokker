@@ -6,6 +6,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import com.pillar.gizmogrokker.bluetoothclasses.BluetoothMajorClass
+import com.pillar.gizmogrokker.bluetoothclasses.BluetoothMinorClass
+import com.pillar.gizmogrokker.bluetoothclasses.BluetoothServiceClass
 
 typealias DiscoveryEndedCallback = (Unit) -> Unit
 
@@ -74,9 +77,9 @@ abstract class BluetoothInterface {
                 name = name,
                 macAddress = address,
                 type = DeviceType.fromInt(type),
-                majorClass = MajorClass.fromInt(bluetoothClass.majorDeviceClass),
-                minorClass = MinorClass.fromInt(bluetoothClass.deviceClass),
-                services = DeviceService.getAvailableServices(bluetoothClass)
+                majorClass = BluetoothMajorClass.fromInt(bluetoothClass.majorDeviceClass),
+                minorClass = BluetoothMinorClass.fromInt(bluetoothClass.deviceClass),
+                services = BluetoothServiceClass.getAvailableServices(bluetoothClass)
             )
 
             private fun Intent.bluetoothDevice(): BluetoothDevice =
