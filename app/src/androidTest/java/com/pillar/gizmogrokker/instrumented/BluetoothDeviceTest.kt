@@ -19,7 +19,7 @@ import com.pillar.gizmogrokker.detail.DeviceDetailActivity
 import com.pillar.gizmogrokker.list.DeviceListFragment
 import com.pillar.gizmogrokker.list.DeviceListActivity
 import com.schibsted.spain.barista.interaction.PermissionGranter
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.device_list_activity.*
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assume.assumeTrue

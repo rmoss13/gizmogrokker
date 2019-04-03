@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.pillar.gizmogrokker.BloothDevice
 import com.pillar.gizmogrokker.R
-import kotlinx.android.synthetic.main.fragment_device.view.*
+import kotlinx.android.synthetic.main.device_fragment.view.*
 
 class DeviceRecyclerViewAdapter(
     private val deviceList: List<BloothDevice>
@@ -16,7 +16,7 @@ class DeviceRecyclerViewAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.fragment_device, parent, false)
+            .inflate(R.layout.device_fragment, parent, false)
         return ViewHolder(view)
     }
 

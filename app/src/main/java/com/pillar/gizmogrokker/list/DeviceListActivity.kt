@@ -14,8 +14,8 @@ import androidx.lifecycle.ViewModelProviders
 import com.pillar.gizmogrokker.*
 import com.pillar.gizmogrokker.GrokkerBluetoothState.*
 import com.pillar.gizmogrokker.detail.DeviceDetailActivity
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_device.view.*
+import kotlinx.android.synthetic.main.device_list_activity.*
+import kotlinx.android.synthetic.main.device_fragment.view.*
 import kotlinx.coroutines.*
 
 const val REQUEST_BLUETOOTH_PERMISSIONS = 1
@@ -35,7 +35,7 @@ class DeviceListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.device_list_activity)
         job = Job()
 
         viewModel = ViewModelProviders.of(this).get(DeviceListViewModel::class.java)

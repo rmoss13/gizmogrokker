@@ -25,7 +25,7 @@ class DeviceListFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ) = inflateView<RecyclerView>(inflater, container,
-        R.layout.fragment_device_list
+        R.layout.device_list_fragment
     )
         .apply {
             layoutManager = LinearLayoutManager(context)
