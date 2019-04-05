@@ -107,7 +107,10 @@ class MainActivity : AppCompatActivity() {
         .also { println("Discovery complete, $it") }
 
     private val bluetoothInterface by lazy {
-        object : BluetoothInterface() {
+        object : BluetoothInterface {
+            override val bluetoothEnabled = DataEvent<Unit>()
+            override val discoveryEnded = DataEvent<Unit>()
+            override val deviceDiscovered = DataEvent<BloothDevice>()
             override val context: Context get() = applicationContext
             override val adapter = BluetoothAdapter.getDefaultAdapter()
         }
