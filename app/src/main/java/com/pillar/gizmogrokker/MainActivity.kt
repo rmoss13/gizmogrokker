@@ -10,7 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
-import com.pillar.gizmogrokker.GrokkerBluetoothState.*
+import com.pillar.gizmogrokker.GrokkerBluetoothState.MustRequest
+import com.pillar.gizmogrokker.GrokkerBluetoothState.NoBlooth
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 
@@ -22,6 +23,24 @@ class MainActivity : AppCompatActivity() {
         private val permissions = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION
         )
+    }
+
+    private val commandDispatcher by lazy {
+        object : FindBloothDevicesCommandDispatcher {
+
+            private val bluetoothInterface = object : BluetoothInterface {
+                override val bluetoothEnabled = DataEvent<Unit>()
+                override val discoveryEnded = DataEvent<Unit>()
+                override val deviceDiscovered = DataEvent<BloothDevice>()
+                override val context: Context get() = applicationContext
+                override val adapter = BluetoothAdapter.getDefaultAdapter()
+            }
+
+            override val bluetoothDiscotech: BluetoothDiscotech =
+                BluetoothDiscotech(bluetoothInterface)
+            override val checker: BluetoothPermissionChecker =
+                BluetoothPermissionChecker(bluetoothInterface, PermissionProxy(applicationContext))
+        }
     }
 
     private lateinit var job: Job
@@ -52,20 +71,25 @@ class MainActivity : AppCompatActivity() {
 
     fun View.onFindBloothDevicesClick() {
         ioScope.launch {
-            bluetoothInterface.checkBluetoothState()
-                .run {
-                    when (this) {
-                        Ready -> viewModel.deviceList = bluetoothInterface.discoverize()
-                        MustRequest -> requestPermissions()
-                        NoBlooth -> viewModel.run {
-                            buttonEnabled = false
-                            buttonText = getString(R.string.NoBloothText)
-                        }
-                    }
-                }
-
-            performUiUpdate { updateViewState() }
+            FindBloothDevicesCommand()
+                .perform()
+                .showResultsInUI()
         }
+    }
+
+    private suspend fun FindBloothDevicesCommand.perform() = with(commandDispatcher) { perform() }
+
+    private suspend fun FindBloothDevicesCommand.Result.showResultsInUI() {
+        when (this) {
+            is FindBloothDevicesCommand.Result.FoundDevices -> viewModel.deviceList = deviceList
+            NoBlooth -> requestPermissions()
+            MustRequest -> viewModel.run {
+                buttonEnabled = false
+                buttonText = getString(R.string.NoBloothText)
+            }
+        }
+
+        performUiUpdate { updateViewState() }
     }
 
     private suspend fun performUiUpdate(block: suspend CoroutineScope.() -> Unit) {
@@ -91,36 +115,14 @@ class MainActivity : AppCompatActivity() {
                     PackageManager.PERMISSION_GRANTED -> permissionGranted()
                     else -> println("grant results ${grantResults[0]}")
                 }
-
             }
         }
     }
 
     private fun permissionGranted() = ioScope.launch {
-        viewModel.deviceList = bluetoothInterface.discoverize()
-        performUiUpdate { updateViewState() }
+        FindBloothDevicesCommand().perform()
+            .showResultsInUI()
     }
-
-    private suspend fun BluetoothInterface.discoverize() = BluetoothDiscotech(this)
-        .also { println("Starting Discovery") }
-        .discoverize()
-        .also { println("Discovery complete, $it") }
-
-    private val bluetoothInterface by lazy {
-        object : BluetoothInterface {
-            override val bluetoothEnabled = DataEvent<Unit>()
-            override val discoveryEnded = DataEvent<Unit>()
-            override val deviceDiscovered = DataEvent<BloothDevice>()
-            override val context: Context get() = applicationContext
-            override val adapter = BluetoothAdapter.getDefaultAdapter()
-        }
-    }
-
-    private fun BluetoothInterface.checkBluetoothState() = BluetoothPermissionChecker(
-        this,
-        PermissionProxy(applicationContext)
-    )
-        .checkBluetoothState()
 
     override fun onDestroy() {
         super.onDestroy()
