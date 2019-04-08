@@ -6,6 +6,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import com.pillar.gizmogrokker.bluetoothclasses.BluetoothMajorClass
+import com.pillar.gizmogrokker.bluetoothclasses.BluetoothMinorClass
+import com.pillar.gizmogrokker.bluetoothclasses.BluetoothServiceClass
 
 typealias DiscoveryEndedCallback = (Unit) -> Unit
 
@@ -25,6 +28,10 @@ interface BluetoothInterface {
     }
 
     fun startDiscovery() {
+        if (adapter?.isDiscovering == true) {
+            adapter?.cancelDiscovery()
+
+        }
         adapter?.startDiscovery()
 
         context.registerReceiver(
@@ -71,10 +78,14 @@ private class Receiver(
             .let { deviceDiscovered.eventOccurred(it) }
     }
 
-    private fun BluetoothDevice.bloothDevice() = BloothDevice(
-        name = name,
-        macAddress = address
-    )
+            private fun BluetoothDevice.bloothDevice() = BloothDevice(
+                name = name,
+                macAddress = address,
+                type = DeviceType.fromInt(type),
+                majorClass = BluetoothMajorClass.fromInt(bluetoothClass.majorDeviceClass),
+                minorClass = BluetoothMinorClass.fromInt(bluetoothClass.deviceClass),
+                services = BluetoothServiceClass.getAvailableServices(bluetoothClass)
+            )
 
     private fun Intent.bluetoothDevice(): BluetoothDevice =
         getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)

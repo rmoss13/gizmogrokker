@@ -1,8 +1,9 @@
-package com.pillar.gizmogrokker
+package com.pillar.gizmogrokker.list
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
@@ -10,14 +11,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
+import com.pillar.gizmogrokker.*
 import com.pillar.gizmogrokker.GrokkerBluetoothState.MustRequest
 import com.pillar.gizmogrokker.GrokkerBluetoothState.NoBlooth
-import kotlinx.android.synthetic.main.activity_main.*
+import com.pillar.gizmogrokker.detail.DeviceDetailActivity
+import kotlinx.android.synthetic.main.device_fragment.view.*
+import kotlinx.android.synthetic.main.device_list_activity.*
 import kotlinx.coroutines.*
 
 const val REQUEST_BLUETOOTH_PERMISSIONS = 1
 
-class MainActivity : AppCompatActivity() {
+class DeviceListActivity : AppCompatActivity() {
 
     companion object {
         private val permissions = arrayOf(
@@ -44,14 +48,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var job: Job
+    private lateinit var viewModel: DeviceListViewModel
     private val ioScope get() = CoroutineScope(Dispatchers.IO + job)
     private val uiScope get() = CoroutineScope(Dispatchers.Main + job)
 
-    private lateinit var viewModel: DeviceListViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.device_list_activity)
         job = Job()
 
         viewModel = ViewModelProviders.of(this).get(DeviceListViewModel::class.java)
@@ -122,6 +125,13 @@ class MainActivity : AppCompatActivity() {
     private fun permissionGranted() = ioScope.launch {
         FindBloothDevicesCommand().perform()
             .showResultsInUI()
+    }
+
+    fun View.onShowDeviceDetailClick() {
+        val intent = Intent(context, DeviceDetailActivity::class.java)
+            .apply { putExtra("device", device_tag.tag as BloothDevice) }
+
+        startActivity(intent)
     }
 
     override fun onDestroy() {
