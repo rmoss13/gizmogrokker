@@ -12,8 +12,6 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProviders
 import com.pillar.gizmogrokker.*
-import com.pillar.gizmogrokker.GrokkerBluetoothState.MustRequest
-import com.pillar.gizmogrokker.GrokkerBluetoothState.NoBlooth
 import com.pillar.gizmogrokker.detail.DeviceDetailActivity
 import kotlinx.android.synthetic.main.device_fragment.view.*
 import kotlinx.android.synthetic.main.device_list_activity.*
@@ -85,8 +83,8 @@ class DeviceListActivity : AppCompatActivity() {
     private suspend fun FindBloothDevicesCommand.Result.showResultsInUI() {
         when (this) {
             is FindBloothDevicesCommand.Result.FoundDevices -> viewModel.deviceList = deviceList
-            NoBlooth -> requestPermissions()
-            MustRequest -> viewModel.run {
+            FindBloothDevicesCommand.Result.MustRequest -> requestPermissions()
+            FindBloothDevicesCommand.Result.NoBlooth -> viewModel.run {
                 buttonEnabled = false
                 buttonText = getString(R.string.NoBloothText)
             }

@@ -38,11 +38,11 @@ class DeviceDetailFragment : Fragment() {
             }
         }
 
-    private fun BloothDevice.name(): String = device.name ?: unknown
-    private fun BloothDevice.displayType(): String = device.type.displayName
-    private fun BloothDevice.majorClass(): String = device.majorClass?.toString() ?: unknown
-    private fun BloothDevice.minorClass(): String = device.minorClass?.displayName() ?: unknown
-    private fun BloothDevice.services(): String =
+    private fun name(): String = device.name ?: unknown
+    private fun displayType(): String = device.type.displayName
+    private fun majorClass(): String = device.majorClass?.toString() ?: unknown
+    private fun minorClass(): String = device.minorClass?.displayName() ?: unknown
+    private fun services(): String =
         device.services.ifEmpty { listOf("None") }.joinToString(", ")
 }
 
