@@ -1,6 +1,7 @@
 package com.pillar.gizmogrokker.instrumented
 
 import android.os.Bundle
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -14,6 +15,7 @@ import com.pillar.gizmogrokker.bluetoothclasses.BluetoothMajorClass
 import com.pillar.gizmogrokker.bluetoothclasses.BluetoothMinorClass
 import com.pillar.gizmogrokker.bluetoothclasses.BluetoothServiceClass
 import com.pillar.gizmogrokker.detail.DeviceDetailFragment
+import com.zegreatrob.testmints.setup
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -21,86 +23,119 @@ import org.junit.runner.RunWith
 class DeviceDetailFragmentTest {
 
     @Test
-    fun showsDeviceMacAddress() {
+    fun showsDeviceMacAddress(): Unit = setup(object {
         val device = minimumValidBlooth()
-        val fragmentArgs = Bundle().apply { putSerializable("device", device) }
-        launchFragmentInContainer<DeviceDetailFragment>(fragmentArgs)
-        onView(withId(R.id.device_mac_address)).check(matches(withText(device.macAddress)))
+    }) exercise {
+        device.asFragmentArgs()
+            .launch<DeviceDetailFragment>()
+    } verify {
+        onView(withId(R.id.device_mac_address))
+            .check(matches(withText(device.macAddress)))
     }
 
     @Test
-    fun showsDeviceName() {
+    fun showsDeviceName(): Unit = setup(object {
         val device = stubBloothDevice(name = "Lucille")
-
-        val fragmentArgs = Bundle().apply { putSerializable("device", device) }
-        launchFragmentInContainer<DeviceDetailFragment>(fragmentArgs)
-        onView(withId(R.id.device_name)).check(matches(withText(device.name)))
+    }) exercise {
+        device.asFragmentArgs()
+            .launch<DeviceDetailFragment>()
+    } verify {
+        onView(withId(R.id.device_name))
+            .check(matches(withText(device.name)))
     }
 
     @Test
-    fun whenNoNameShowsNoNameMessage() {
-        val fragmentArgs = Bundle().apply { putSerializable("device", minimumValidBlooth()) }
-        launchFragmentInContainer<DeviceDetailFragment>(fragmentArgs)
-        onView(withId(R.id.device_name)).check(matches(withText("Unknown")))
+    fun whenNoNameShowsNoNameMessage(): Unit = setup(object {
+        val noNameBlooth = minimumValidBlooth()
+    }) exercise {
+        noNameBlooth.asFragmentArgs()
+            .launch<DeviceDetailFragment>()
+    } verify {
+        onView(withId(R.id.device_name))
+            .check(matches(withText("Unknown")))
+    }
+
+    private fun BloothDevice.asFragmentArgs() = Bundle().apply {
+        putSerializable("device", this@asFragmentArgs)
     }
 
     @Test
-    fun showsDeviceType() {
+    fun showsDeviceType(): Unit = setup(object {
         val device = stubBloothDevice(type = DeviceType.LE)
-
-        val fragmentArgs = Bundle().apply { putSerializable("device", device) }
-        launchFragmentInContainer<DeviceDetailFragment>(fragmentArgs)
-        onView(withId(R.id.device_type)).check(matches(withText("Low Energy")))
+    }) exercise {
+        device.asFragmentArgs()
+            .launch<DeviceDetailFragment>()
+    } verify {
+        onView(withId(R.id.device_type))
+            .check(matches(withText("Low Energy")))
     }
 
     @Test
-    fun showsMajorClass() {
+    fun showsMajorClass(): Unit = setup(object {
         val device = stubBloothDevice(majorClass = BluetoothMajorClass.Toy)
-
-        val fragmentArgs = Bundle().apply { putSerializable("device", device) }
-        launchFragmentInContainer<DeviceDetailFragment>(fragmentArgs)
-        onView(withId(R.id.device_major_class)).check(matches(withText("Toy")))
+    }) exercise {
+        device.asFragmentArgs()
+            .launch<DeviceDetailFragment>()
+    } verify {
+        onView(withId(R.id.device_major_class))
+            .check(matches(withText("Toy")))
     }
 
     @Test
-    fun whenNoMajorClassShowUnknown() {
-        val fragmentArgs = Bundle().apply { putSerializable("device", minimumValidBlooth()) }
-        launchFragmentInContainer<DeviceDetailFragment>(fragmentArgs)
-        onView(withId(R.id.device_major_class)).check(matches(withText("Unknown")))
+    fun whenNoMajorClassShowUnknown(): Unit = setup(object {
+        val device = minimumValidBlooth()
+    }) exercise {
+        device.asFragmentArgs()
+            .launch<DeviceDetailFragment>()
+    } verify {
+        onView(withId(R.id.device_major_class))
+            .check(matches(withText("Unknown")))
     }
 
     @Test
-    fun showMinorClass() {
+    fun showMinorClass(): Unit = setup(object {
         val device = stubBloothDevice(minorClass = BluetoothMinorClass.ToyUncategorized)
-
-        val fragmentArgs = Bundle().apply { putSerializable("device", device) }
-        launchFragmentInContainer<DeviceDetailFragment>(fragmentArgs)
-        onView(withId(R.id.device_minor_class)).check(matches(withText("Uncategorized")))
+    }) exercise {
+        device.asFragmentArgs()
+            .launch<DeviceDetailFragment>()
+    } verify {
+        onView(withId(R.id.device_minor_class))
+            .check(matches(withText("Uncategorized")))
     }
 
     @Test
-    fun whenNoMinorClassShowUnknown() {
-        val fragmentArgs = Bundle().apply { putSerializable("device", minimumValidBlooth()) }
-        launchFragmentInContainer<DeviceDetailFragment>(fragmentArgs)
-        onView(withId(R.id.device_minor_class)).check(matches(withText("Unknown")))
+    fun whenNoMinorClassShowUnknown(): Unit = setup(object {
+        val device = minimumValidBlooth()
+    }) exercise {
+        device.asFragmentArgs()
+            .launch<DeviceDetailFragment>()
+    } verify {
+        onView(withId(R.id.device_minor_class))
+            .check(matches(withText("Unknown")))
     }
 
     @Test
-    fun whenServicesAreAvailableShowsDeviceServices() {
+    fun whenServicesAreAvailableShowsDeviceServices(): Unit = setup(object {
         val device = stubBloothDevice(
             services = listOf(BluetoothServiceClass.Audio, BluetoothServiceClass.Capture)
         )
-
-        val fragmentArgs = Bundle().apply { putSerializable("device", device) }
-        launchFragmentInContainer<DeviceDetailFragment>(fragmentArgs)
-        onView(withId(R.id.device_services)).check(matches(withText("Audio, Capture")))
+    }) exercise {
+        device.asFragmentArgs()
+            .launch<DeviceDetailFragment>()
+    } verify {
+        onView(withId(R.id.device_services))
+            .check(matches(withText("Audio, Capture")))
     }
 
     @Test
-    fun whenNoDeviceServicesAreAvailableShowUnknown() {
-        val fragmentArgs = Bundle().apply { putSerializable("device", minimumValidBlooth()) }
-        launchFragmentInContainer<DeviceDetailFragment>(fragmentArgs)
-        onView(withId(R.id.device_services)).check(matches(withText("Unknown")))
+    fun whenNoDeviceServicesAreAvailableShowUnknown(): Unit = setup(object {
+        val device = minimumValidBlooth()
+    }) exercise {
+        device.asFragmentArgs()
+            .launch<DeviceDetailFragment>()
+    } verify {
+        onView(withId(R.id.device_services))
+            .check(matches(withText("Unknown")))
     }
 
     private fun minimumValidBlooth(): BloothDevice = BloothDevice(
@@ -113,6 +148,7 @@ class DeviceDetailFragmentTest {
     )
 }
 
+private inline fun <reified T : Fragment> Bundle.launch() = launchFragmentInContainer<T>(this)
 
 fun stubBloothDevice(
     name: String? = "Buster",

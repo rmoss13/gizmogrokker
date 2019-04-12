@@ -4,6 +4,10 @@ plugins {
     id("kotlin-android-extensions")
 }
 
+repositories {
+    maven { url = uri("https://dl.bintray.com/robertfmurdock/zegreatrob") }
+}
+
 android {
     compileSdkVersion(28)
     defaultConfig {
@@ -48,6 +52,9 @@ dependencies {
     testImplementation("org.mockito:mockito-core:2.24.5")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0")
     testImplementation("junit:junit:4.12")
+    testImplementation("com.zegreatrob.testmints:standard:+")
+
+    androidTestImplementation("com.zegreatrob.testmints:standard:+")
 
     androidTestImplementation("androidx.test:runner:1.1.2-alpha02")
 
