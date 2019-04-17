@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.pillar.gizmogrokker.BloothDevice
 import com.pillar.gizmogrokker.R
+import kotlinx.android.synthetic.main.device_detail_fragment.*
 import kotlinx.android.synthetic.main.device_detail_fragment.view.*
 import java.io.Serializable
 
@@ -19,6 +20,11 @@ class DeviceDetailFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View = inflater.inflate(R.layout.device_detail_fragment, container, false)
         .apply { updateUIElements() }
+
+    override fun onStart() {
+        super.onStart()
+        connect_device.setOnClickListener {  }
+    }
 
     private fun View.updateUIElements() = device?.apply {
         device_mac_address.text = macAddress()
