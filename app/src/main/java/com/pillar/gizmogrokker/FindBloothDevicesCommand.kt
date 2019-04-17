@@ -4,7 +4,7 @@ class FindBloothDevicesCommand {
 
     sealed class Result {
 
-        data class FoundDevices(val deviceList: List<BloothDevice>) :
+        data class FoundDevices(val foundDeviceList: List<BloothDevice>) :
             Result()
 
         object NoBlooth : Result()

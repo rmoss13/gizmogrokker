@@ -63,14 +63,17 @@ class DeviceListActivity : AppCompatActivity() {
     private fun updateViewState() {
         deviceListFragment.deviceList = viewModel.deviceList
         findDevices.apply {
-            isEnabled = viewModel.buttonEnabled
-            text = viewModel.buttonText
+            isEnabled = viewModel.buttonEnabled && !viewModel.isScanning
+            text = if (viewModel.isScanning) "Scanning" else viewModel.buttonText
         }
     }
 
     private val deviceListFragment get() = fragment as DeviceListFragment
 
     fun View.onFindBloothDevicesClick() {
+        viewModel.isScanning = true
+        updateViewState()
+
         ioScope.launch {
             FindBloothDevicesCommand()
                 .perform()
@@ -82,7 +85,10 @@ class DeviceListActivity : AppCompatActivity() {
 
     private suspend fun FindBloothDevicesCommand.Result.showResultsInUI() {
         when (this) {
-            is FindBloothDevicesCommand.Result.FoundDevices -> viewModel.deviceList = deviceList
+            is FindBloothDevicesCommand.Result.FoundDevices -> viewModel.run {
+                deviceList = foundDeviceList
+                isScanning = false
+            }
             FindBloothDevicesCommand.Result.MustRequest -> requestPermissions()
             FindBloothDevicesCommand.Result.NoBlooth -> viewModel.run {
                 buttonEnabled = false
@@ -141,5 +147,6 @@ class DeviceListActivity : AppCompatActivity() {
 class DeviceListViewModel(
     var deviceList: List<BloothDevice> = emptyList(),
     var buttonText: String = "Find Blooth Devices!",
-    var buttonEnabled: Boolean = true
+    var buttonEnabled: Boolean = true,
+    var isScanning: Boolean = false
 ) : ViewModel()
