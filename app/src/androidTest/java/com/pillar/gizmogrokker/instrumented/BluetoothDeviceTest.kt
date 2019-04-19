@@ -43,7 +43,7 @@ class BluetoothDeviceTest {
     private val deviceListFragment get() = activityRule.activity.fragment as DeviceListFragment
 
     @Before
-    fun setUp() {
+    fun onlyRunWhenBluetoothIsAvailable() {
         assumeTrue(BluetoothAdapter.getDefaultAdapter() != null)
     }
 
@@ -69,15 +69,6 @@ class BluetoothDeviceTest {
         allowPermissionsIfNeeded(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
-    private fun duration(start: Long) = System.currentTimeMillis() - start
-
-    private fun waitUntil(waitTime: Int, shouldContinue: () -> Boolean) {
-        val start = System.currentTimeMillis()
-        while (!shouldContinue() && duration(start) < waitTime) {
-            Thread.yield()
-        }
-    }
-
     private fun waitToFindDevices() {
         deviceListFragment.run {
             waitUntil(30_000) { deviceList.isNotEmpty() }
@@ -88,9 +79,37 @@ class BluetoothDeviceTest {
         RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
             position,
             click()
-         )
+        )
 
     private inline fun <reified T> instanceOf() = instanceOf<T>(T::class.java)
 }
 
 fun <C : Any> C.nextStageOfTest() = setup(this)
+
+fun waitUntil(waitTime: Int, shouldContinue: () -> Boolean) {
+    val start = System.currentTimeMillis()
+    while (!shouldContinue() && duration(start) < waitTime) {
+        Thread.yield()
+    }
+}
+
+
+fun waitUntilAssert(waitTime: Int, shouldContinue: () -> Unit) {
+    val start = System.currentTimeMillis()
+    while (!tryShouldContinue(shouldContinue) && duration(start) < waitTime) {
+        Thread.yield()
+    }
+
+    if (duration(start) < waitTime) {
+        shouldContinue()
+    }
+}
+
+private fun tryShouldContinue(shouldContinue: () -> Unit) = try {
+    shouldContinue()
+    true
+} catch (throwable: Throwable) {
+    false
+}
+
+private fun duration(start: Long) = System.currentTimeMillis() - start

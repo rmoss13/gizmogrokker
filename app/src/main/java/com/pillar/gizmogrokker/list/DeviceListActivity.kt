@@ -91,6 +91,7 @@ class DeviceListActivity : AppCompatActivity() {
             }
             FindBloothDevicesCommand.Result.MustRequest -> requestPermissions()
             FindBloothDevicesCommand.Result.NoBlooth -> viewModel.run {
+                isScanning = false
                 buttonEnabled = false
                 buttonText = getString(R.string.NoBloothText)
             }
