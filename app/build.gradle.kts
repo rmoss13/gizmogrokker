@@ -1,19 +1,15 @@
 plugins {
-    id("com.android.application")
-    id("kotlin-android")
-    id("kotlin-android-extensions")
-}
-
-repositories {
-    maven { url = uri("https://dl.bintray.com/robertfmurdock/zegreatrob") }
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 android {
-    compileSdkVersion(28)
+    namespace = "com.pillar.gizmogrokker"
+    compileSdk = 35
     defaultConfig {
         applicationId = "com.pillar.gizmogrokker"
-        minSdkVersion(27)
-        targetSdkVersion(28)
+        minSdk = 31
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -27,44 +23,42 @@ android {
             )
         }
     }
-
-    packagingOptions {
-        exclude("META-INF/atomicfu.kotlin_module")
+    buildFeatures {
+        viewBinding = true
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+    kotlinOptions {
+        jvmTarget = "21"
     }
 }
 
 dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to arrayOf("*.jar"))))
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.21")
-    implementation("androidx.appcompat:appcompat:1.1.0-alpha03")
-    implementation("androidx.core:core-ktx:1.1.0-alpha05")
-    implementation("androidx.constraintlayout:constraintlayout:1.1.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.0-alpha")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.2.0-alpha")
-    implementation("androidx.legacy:legacy-support-v4:1.0.0")
-    implementation("androidx.recyclerview:recyclerview:1.1.0-alpha03")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.0.0")
-    implementation("androidx.lifecycle:lifecycle-extensions:2.0.0")
+    implementation(libs.kotlin.stdlib.jdk7)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.jetbrains.kotlinx.coroutines.android)
+    implementation(libs.androidx.legacy.support.v4)
+    implementation(libs.androidx.recyclerview)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.extensions)
 
-    debugImplementation("androidx.fragment:fragment-testing:1.1.0-alpha05")
-    debugImplementation("androidx.test:runner:1.1.2-alpha02")
+    debugImplementation(libs.androidx.fragment.testing)
+    debugImplementation(libs.androidx.runner)
 
-    testImplementation("org.mockito:mockito-core:2.24.5")
-    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.1.0")
-    testImplementation("junit:junit:4.12")
-    testImplementation("com.zegreatrob.testmints:standard:1.3.2")
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.junit.v412)
 
-    androidTestImplementation("com.zegreatrob.testmints:standard:1.3.2")
+    androidTestImplementation(libs.androidx.runner)
 
-    androidTestImplementation("androidx.test:runner:1.1.2-alpha02")
-
-    androidTestImplementation("androidx.test:rules:1.1.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.2.0-alpha02")
-    androidTestImplementation("androidx.test.espresso:espresso-intents:3.1.1")
-    androidTestImplementation("androidx.test.espresso:espresso-contrib:3.1.1")
-    androidTestImplementation("com.schibsted.spain:barista:2.10.0") {
-        exclude(group = "com.android.support")
-        exclude(group = "org.jetbrains.kotlin")
-        exclude(group = "androidx.test.espresso")
-    }
+    androidTestImplementation(libs.androidx.rules)
+    androidTestImplementation(libs.androidx.espresso.core.v320alpha02)
+    androidTestImplementation(libs.androidx.espresso.intents)
+    androidTestImplementation(libs.androidx.espresso.contrib)
 }

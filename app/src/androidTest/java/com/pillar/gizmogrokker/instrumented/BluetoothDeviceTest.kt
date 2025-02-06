@@ -19,11 +19,8 @@ import com.pillar.gizmogrokker.R
 import com.pillar.gizmogrokker.detail.DeviceDetailActivity
 import com.pillar.gizmogrokker.list.DeviceListActivity
 import com.pillar.gizmogrokker.list.DeviceListFragment
-import com.schibsted.spain.barista.interaction.PermissionGranter.allowPermissionsIfNeeded
-import com.zegreatrob.testmints.setup
-import kotlinx.android.synthetic.main.device_list_activity.*
 import org.hamcrest.CoreMatchers.instanceOf
-import org.hamcrest.Matchers.equalTo
+import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule

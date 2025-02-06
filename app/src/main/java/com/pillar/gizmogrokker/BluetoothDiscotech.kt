@@ -10,13 +10,16 @@ class BluetoothDiscotech(private val bluetoothInterface: BluetoothInterface) {
     private fun beginDiscovery() = if (bluetoothInterface.isEnabled) {
         bluetoothInterface.startDiscovery()
     } else {
-        bluetoothInterface.enable()
         bluetoothInterface.bluetoothEnabled + ::onBluetoothEnabled
     }
 
     private suspend fun collectDevices() = mutableListOf<BloothDevice>()
         .also { devices ->
-            bluetoothInterface.deviceDiscovered + { devices += it }
+            bluetoothInterface.deviceDiscovered + {
+                if (it != null) {
+                    devices += it
+                }
+            }
             waitForDiscoveryToFinish()
         }
 

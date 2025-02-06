@@ -1,11 +1,13 @@
 package com.pillar.gizmogrokker
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import androidx.core.content.ContextCompat
 import com.pillar.gizmogrokker.bluetoothclasses.BluetoothMajorClass
 import com.pillar.gizmogrokker.bluetoothclasses.BluetoothMinorClass
 import com.pillar.gizmogrokker.bluetoothclasses.BluetoothServiceClass
@@ -18,15 +20,12 @@ interface BluetoothInterface {
     val context: Context
     val bluetoothEnabled: Event<Unit>
     val discoveryEnded: Event<Unit>
-    val deviceDiscovered: Event<BloothDevice>
+    val deviceDiscovered: Event<BloothDevice?>
 
     val hasBluetoothSupport: Boolean get() = adapter != null
     val isEnabled: Boolean get() = adapter?.isEnabled ?: false
 
-    fun enable() {
-        adapter?.enable()
-    }
-
+    @SuppressLint("MissingPermission")
     fun startDiscovery() {
         if (adapter?.isDiscovering == true) {
             adapter?.cancelDiscovery()
@@ -34,13 +33,12 @@ interface BluetoothInterface {
         }
         adapter?.startDiscovery()
 
-        context.registerReceiver(
-            Receiver(
+        ContextCompat.registerReceiver(
+            context, Receiver(
                 bluetoothEnabled,
                 discoveryEnded,
                 deviceDiscovered
-            ),
-            Receiver.intentFilter()
+            ), Receiver.intentFilter(), ContextCompat.RECEIVER_NOT_EXPORTED
         )
     }
 }
@@ -48,7 +46,7 @@ interface BluetoothInterface {
 private class Receiver(
     private val bluetoothEnabled: Event<Unit>,
     private val discoveryEnded: Event<Unit>,
-    private val deviceDiscovered: Event<BloothDevice>
+    private val deviceDiscovered: Event<BloothDevice?>
 ) : BroadcastReceiver() {
 
     companion object {
@@ -74,21 +72,24 @@ private class Receiver(
 
     private fun Intent.handleFound() {
         bluetoothDevice()
-            .bloothDevice()
+            ?.bloothDevice()
             .let { deviceDiscovered.eventOccurred(it) }
     }
 
-            private fun BluetoothDevice.bloothDevice() = BloothDevice(
-                name = name,
-                macAddress = address,
-                type = DeviceType.fromInt(type),
-                majorClass = BluetoothMajorClass.fromInt(bluetoothClass.majorDeviceClass),
-                minorClass = BluetoothMinorClass.fromInt(bluetoothClass.deviceClass),
-                services = BluetoothServiceClass.getAvailableServices(bluetoothClass)
-            )
+    @SuppressLint("MissingPermission")
+    private fun BluetoothDevice.bloothDevice(): BloothDevice {
+        return BloothDevice(
+            name = name,
+            macAddress = address,
+            type = DeviceType.fromInt(type),
+            majorClass = BluetoothMajorClass.fromInt(bluetoothClass.majorDeviceClass),
+            minorClass = BluetoothMinorClass.fromInt(bluetoothClass.deviceClass),
+            services = BluetoothServiceClass.getAvailableServices(bluetoothClass)
+        )
+    }
 
-    private fun Intent.bluetoothDevice(): BluetoothDevice =
-        getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+    private fun Intent.bluetoothDevice(): BluetoothDevice? =
+        getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
 
 }
 

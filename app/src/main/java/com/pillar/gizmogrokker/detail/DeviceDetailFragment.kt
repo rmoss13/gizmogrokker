@@ -6,33 +6,38 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.pillar.gizmogrokker.BloothDevice
-import com.pillar.gizmogrokker.R
-import kotlinx.android.synthetic.main.device_detail_fragment.*
-import kotlinx.android.synthetic.main.device_detail_fragment.view.*
+import com.pillar.gizmogrokker.databinding.DeviceDetailFragmentBinding
 import java.io.Serializable
 
 class DeviceDetailFragment : Fragment() {
+    private var _binding: DeviceDetailFragmentBinding? = null
+    private val binding get() = _binding!!
+
     private val unknown = "Unknown"
     private val device: BloothDevice? get() = arguments?.serializable("device")
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View = inflater.inflate(R.layout.device_detail_fragment, container, false)
-        .apply { updateUIElements() }
+    ): View {
+        _binding = DeviceDetailFragmentBinding.inflate(inflater, container, false)
+            .apply { updateUIElements() }
+        val view = binding.root
+        return view
+    }
 
     override fun onStart() {
         super.onStart()
-        connect_device.setOnClickListener {  }
+        binding.connectDevice.setOnClickListener { }
     }
 
-    private fun View.updateUIElements() = device?.apply {
-        device_mac_address.text = macAddress()
-        device_name.text = name()
-        device_type.text = displayType()
-        device_major_class.text = majorClass()
-        device_minor_class.text = minorClass()
-        device_services.text = services()
+    private fun updateUIElements() = device?.apply {
+        binding.deviceMacAddress.text = macAddress()
+        binding.deviceName.text = name()
+        binding.deviceType.text = displayType()
+        binding.deviceMajorClass.text = majorClass()
+        binding.deviceMinorClass.text = minorClass()
+        binding.deviceServices.text = services()
     }
 
     private fun BloothDevice.macAddress() = macAddress

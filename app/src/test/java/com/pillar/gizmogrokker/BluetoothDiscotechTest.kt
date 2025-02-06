@@ -101,10 +101,6 @@ class FakeBluetoothInterface(
     var startDiscoveryCallCount: Int = 0
     var enableCount: Int = 0
 
-    override fun enable() {
-        enableCount++
-    }
-
     override fun startDiscovery() {
         startDiscoveryCallCount++
     }

@@ -2,6 +2,7 @@ package com.pillar.gizmogrokker.list
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,16 +11,16 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.pillar.gizmogrokker.*
+import com.pillar.gizmogrokker.databinding.DeviceListActivityBinding
 import com.pillar.gizmogrokker.detail.DeviceDetailActivity
-import kotlinx.android.synthetic.main.device_fragment.view.*
-import kotlinx.android.synthetic.main.device_list_activity.*
 import kotlinx.coroutines.*
 
 const val REQUEST_BLUETOOTH_PERMISSIONS = 1
 
 class DeviceListActivity : AppCompatActivity() {
+    private lateinit var binding: DeviceListActivityBinding
 
     companion object {
         private val permissions = arrayOf(
@@ -31,11 +32,13 @@ class DeviceListActivity : AppCompatActivity() {
         object : FindBloothDevicesCommandDispatcher {
 
             private val bluetoothInterface = object : BluetoothInterface {
+                val bluetoothManager: BluetoothManager =
+                    context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
                 override val bluetoothEnabled = DataEvent<Unit>()
                 override val discoveryEnded = DataEvent<Unit>()
-                override val deviceDiscovered = DataEvent<BloothDevice>()
+                override val deviceDiscovered = DataEvent<BloothDevice?>()
                 override val context: Context get() = applicationContext
-                override val adapter = BluetoothAdapter.getDefaultAdapter()
+                override val adapter = bluetoothManager.adapter
             }
 
             override val bluetoothDiscotech: BluetoothDiscotech =
@@ -52,23 +55,25 @@ class DeviceListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.device_list_activity)
-        job = Job()
+        binding = DeviceListActivityBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
-        viewModel = ViewModelProviders.of(this).get(DeviceListViewModel::class.java)
+        job = Job()
+        viewModel = ViewModelProvider(this)[DeviceListViewModel::class.java]
 
         updateViewState()
     }
 
     private fun updateViewState() {
         deviceListFragment.deviceList = viewModel.deviceList
-        findDevices.apply {
+        binding.findDevices.apply {
             isEnabled = viewModel.buttonEnabled && !viewModel.isScanning
             text = if (viewModel.isScanning) "Scanning" else viewModel.buttonText
         }
     }
 
-    private val deviceListFragment get() = fragment as DeviceListFragment
+    private val deviceListFragment get() = binding.fragment as DeviceListFragment
 
     fun View.onFindBloothDevicesClick() {
         viewModel.isScanning = true
@@ -89,6 +94,7 @@ class DeviceListActivity : AppCompatActivity() {
                 deviceList = foundDeviceList
                 isScanning = false
             }
+
             FindBloothDevicesCommand.Result.MustRequest -> requestPermissions()
             FindBloothDevicesCommand.Result.NoBlooth -> viewModel.run {
                 isScanning = false
@@ -117,6 +123,7 @@ class DeviceListActivity : AppCompatActivity() {
         permissions: Array<String>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when (requestCode) {
             REQUEST_BLUETOOTH_PERMISSIONS -> {
                 when (grantResults[0]) {
@@ -134,7 +141,7 @@ class DeviceListActivity : AppCompatActivity() {
 
     fun View.onShowDeviceDetailClick() {
         val intent = Intent(context, DeviceDetailActivity::class.java)
-            .apply { putExtra("device", device_tag.tag as BloothDevice) }
+            .apply { putExtra("device", binding.fragment.tag as BloothDevice) }
 
         startActivity(intent)
     }
